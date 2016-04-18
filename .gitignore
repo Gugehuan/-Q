@@ -1,53 +1,79 @@
-# Xcode
-#
-# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
+//
+//  LeftViewController.m
+//  UIdemo
+//
+//  Created by ruicai101 on 16/4/12.
+//  Copyright © 2016年 ruicai101. All rights reserved.
+//
 
-## Build generated
-build/
-DerivedData
+#import "LeftViewController.h"
+#import "NewsDAO.h"
+#import "Book.h"
+@interface LeftViewController ()
+@property NewsDAO *dao;
+@end
 
-## Various settings
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-xcuserdata
+@implementation LeftViewController
 
-## Other
-*.xccheckout
-*.moved-aside
-*.xcuserstate
-*.xcscmblueprint
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.dao=[[NewsDAO alloc]init];
+    [self.dao findAll];
 
-## Obj-C/Swift specific
-*.hmap
-*.ipa
+    
+    self.tableView =[[UITableView alloc]initWithFrame:self.view.frame style:UITableViewStylePlain];
+    self.tableView.delegate =self;
+    self.tableView.dataSource =self;
+    [self.view addSubview:self.tableView];
+    self.tableView.rowHeight = 50;
+    self.tableView.separatorStyle = NO;
+    self.tableView.backgroundColor =[UIColor clearColor];
+    
+    
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(findallfinished:) name:@"findall" object:nil];
 
-# CocoaPods
-#
-# We recommend against adding the Pods directory to your .gitignore. However
-# you should judge for yourself, the pros and cons are mentioned at:
-# https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
-#
-# Pods/
+}
 
-# Carthage
-#
-# Add this line if you want to avoid checking in source code from Carthage dependencies.
-# Carthage/Checkouts
+-(void)findallfinished:(NSNotification*)notification{
+    
+    self.objects=[notification object];
+    [self.tableView reloadData];
+}
 
-Carthage/Build
 
-# fastlane
-#
-# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the 
-# screenshots whenever they are needed.
-# For more information about the recommended setup visit:
-# https://github.com/fastlane/fastlane/blob/master/docs/Gitignore.md
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
 
-fastlane/report.xml
-fastlane/screenshots
+#pragma UITableView DataSource
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return self.objects.count;
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    static NSString *TableSampleIdentifier=@"reuseIdentifier";
+    UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:TableSampleIdentifier];
+    if (cell==nil) {
+        cell=[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:TableSampleIdentifier];
+    }
+        cell.backgroundColor=[UIColor clearColor];
+        cell.textLabel.text=[self.objects objectAtIndex:indexPath.row][@"name"];
+
+        return cell;
+    
+}
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    NSString *image=[self.objects objectAtIndex:indexPath.row][@"img"];
+    [[NSNotificationCenter defaultCenter]postNotificationName:@"imagename" object:image];
+}
+@end
